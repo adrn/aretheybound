@@ -36,12 +36,14 @@
 \label{sec:model}
 
 The \tgas\ catalog provides measurements of sky position, $(\alpha, \delta)$,
-parallax, $\pi$, and proper motions, $(\mu_{\alpha^*}, \mu_\delta)$ along with
-the covariance matrix, $\mat{C}^{*}$, associated with these data for each star
-in the pair.
-Radial velocity measurements, $v_r$, with uncertainties $\sigma_{v_r}$ are
-provided from high-resolution spectroscopy.
-For brevity, we pack the 6D kinematic data into the vector
+parallax, $\pi$, and proper motions, $(\mu_{\alpha^*}, \mu_\delta)$, along with
+the covariance matrix, $\tilde{\mat{C}}$, associated with these data for each
+star in the pair.
+Each star additionally has a precise radial-velocity measurement, $v_r$, with
+uncertainty $\sigma_{v_r}$ derive from high-resolution, high signal-to-noise
+spectroscopy.
+For brevity in defining probability distributions below, we pack these 6D
+kinematic data into vectors
 \begin{eqnarray}
   \vec{y} &=&
       \transpose{\left(
@@ -55,27 +57,27 @@ For brevity, we pack the 6D kinematic data into the vector
         \end{array}
       \right)}
 \end{eqnarray}
-and define a new $6\times6$ covariance matrix $\mat{C}$ that contains the
-astrometric covariance matrix in the upper-left block, the radial-velocity
-variance $\sigma_{v_r}^2$ in the bottom-right diagonal element, and all other
-matrix elements set to zero.
-We additionally assume we have measurements of the masses of the two stars,
-$\hat{M}_1$ and $\hat{M}_1$ with uncertainties $\sigma_{M_1}$ and
-$\sigma_{M_2}$, respectively.
+and define a new $6\times6$ covariance matrix $\mat{C}$ for each star that
+contains the astrometric covariance matrix in the upper-left block, the
+radial-velocity variance $\sigma_{v_r}^2$ in the bottom-right diagonal element,
+and all other matrix elements set to zero.
+We additionally have measurements of the masses of the two stars, $\hat{M}_1$
+and $\hat{M}_1$ with uncertainties $\sigma_{M_1}$ and $\sigma_{M_2}$,
+respectively.
 
 Our model parameters include, amongst others, the true 6D Cartesian phase-space
 coordinates for each star, $\vec{w}_1=(\vec{x}_1, \vec{v}_1)$ and
-$\vec{w}_2=(\vec{x}_2, \vec{v}_2)$. These vectors $\vec{w}$ can be transformed to
-the data-space---heliocentric sperical coordinates, where $\vec{w}$ becomes
-$\vec{w}^*$---where the likelihood evaluation for the kinematic data is a simple
-multivariate Gaussian:
+$\vec{w}_2=(\vec{x}_2, \vec{v}_2)$.
+These vectors $\vec{w}$ can be transformed to the data-space---heliocentric
+spherical coordinates, where $\vec{w}$ becomes $\vec{w}^*$---where the
+likelihood evaluation for the kinematic data is a multivariate Gaussian:
 \begin{eqnarray}
     p(\vec{y}_1, \vec{y}_2 \given \vec{w}_1, \vec{w}_2, \mat{C}_1, \mat{C}_2)
         &=&
         \norm\left(\vec{y}_1 \given \vec{w}_1^*, \mat{C}_1 \right) \,
         \norm\left(\vec{y}_2 \given \vec{w}_2^*, \mat{C}_2 \right)
 \end{eqnarray}
-where
+with
 \begin{eqnarray}
     \norm\left(\vec{x} \given \vec{\mu}, \mat{\Sigma}\right) &=&
         \left[\det\left(\frac{\mat{\Sigma}^{-1}}{2\pi}\right)\right]^{1/2} \,
@@ -92,86 +94,34 @@ are also Gaussian:
         \norm\left(\hat{M}_2 \given M_2, \sigma_{M_2}^2\right)
 \end{eqnarray}
 
-We consider three possible models for the prior over $(\vec{w}_1, \vec{w}_2)$:
+We consider three possible models for the prior $p(\vec{w}_1, \vec{w}_2)$ over
+the true 6D phase-space coordinates for each star:
 \begin{enumerate}
-    \item The stars are a bound, wide-binary system;
+    \item The stars are a bound, wide-binary system on a circular orbit;
     \item The stars are co-moving within some tolerance (velocity dispersion)
     but unbound;
     \item The stars are independently sampled from the field population.
 \end{enumerate}
-In case 1 (wide-binary) the prior can be expressed in terms of the 6D barycentric phase-space coordinates of the pair, $\vec{w}_{\rm bary}$, and the difference in 6D coordinates, $\Delta\vec{w}$
+In case 1 (wide-binary), the prior can be expressed in terms of the 6D
+barycentric phase-space coordinates of the pair, $\vec{w}_{\rm bary}$, and the
+difference in 6D coordinates, $\Delta\vec{w}$, and is conditional on the true
+masses of the stars and a softening velocity dispersion, $V_1$, introduced to
+approximately account for eccentricity:
 \begin{eqnarray}
-    p_1(\vec{w}_1, \vec{w}_2) &=&
-        \int p()
+    p_1(\vec{w}_1, \vec{w}_2 \given M_1, M_2) &=&
+        p(\vec{x}_{\rm bary} \given M_1, M_2) \,
+        p(\Delta\vec{x} \given M_1, M_2) \,
+        p(\vec{v}_{\rm bary} \given M_1, M_2) \,
+        p(\Delta\vec{v} \given M_1, M_2, V_1) \\
+    p(\vec{x}_{\rm bary} \given M_1, M_2) &=& \mathcal{U}(-1,1)~[{\rm kpc}] \\
+    p(\Delta\vec{x} \given M_1, M_2) &\propto& \left|\Delta\vec{x}\right|^{-3} \\
+    p(\vec{v}_{\rm bary} \given M_1, M_2) &=&
+      \mathcal{N}(\vec{v}_{\rm bary} \given 0, V_3) \\
+    p(\Delta\vec{v} \given M_1, M_2, V_1) &=&
+      \mathcal{N}\left(\Delta\vec{v} \given
+        2\,\left[G \, (M_1+M_2)\right]/\left|\Delta\vec{x}\right|, V_1\right) \\
 \end{eqnarray}
 
-Combining these precise radial velocities with the \gaia\ astrometry, we can
-compare differences between the inferred 6D phase-space properties for the
-two stars.
-We start by generating posterior samples over the Heliocentric distance, $r$,
-tangential velocities, $(v_\alpha, v_\delta)$, and radial velocity, $\hat{v}_r$,
-given the observed parallax, $\pi$, and proper motion components,
-$(\mu_{\alpha^*}, \mu_\delta)$, and radial velocity, $v_r$.
-By defining the vectors
-% SMOH: I understand you meant hat v_r as the latent true radial velocity but
-% personally think a) it can confuse some people that there are hat quantities
-% with no-hat quantities for hat-y vector and thus b) it'd be better to use hat
-% quantities for observed variables and no-hat for latent true ones.
-% SMOH: v_r is missing in the LHS of eq(3)
-\begin{eqnarray}
-  \vec{y} &=&
-      \transpose{\left(
-        \begin{array}{c@{\hspace{1em}} c@{\hspace{1em}} c@{\hspace{1em}} c}
-          \pi &
-          \mu_{\alpha^*} &
-          \mu_\delta &
-          v_r
-        \end{array}
-      \right)}\\
-  \hat{\vec{y}} &=&
-      \transpose{\left(
-        \begin{array}{c@{\hspace{1em}} c@{\hspace{1em}} c@{\hspace{1em}} c}
-          r^{-1} &
-          r^{-1}\,v_\alpha &
-          r^{-1}\,v_\delta &
-          \hat{v}_r
-        \end{array}
-      \right)}
-\end{eqnarray}
-and by considering the covariance matrix $\mat{C}$ between the observed
-quantities (provided by \tgas\ and extended to include the uncorrelated radial
-velocity uncertainty), the likelihood can be written
-\begin{eqnarray}
-p(\pi, \mu_{\alpha^*}, \mu_\delta \given r, v_\alpha, v_\delta) &=&
-  \left[\det\left(\frac{\mat{C}^{-1}}{2\pi}\right)\right]^{1/2} \,
-    \exp \left[ -\frac{1}{2} \transpose{\left(\vec{y} - \hat{\vec{y}} \right)} \,
-    \mat{C}^{-1} \,
-    \left(\vec{y} - \hat{\vec{y}} \right) \right] \label{eq:likefn} \quad .
-\end{eqnarray}
-We adopt a uniform space density prior for the distance and an isotropic
-Gaussian for any velocity component, $v$, with a dispersion $\sigma_v=25~\kms$
-\begin{eqnarray}
-p(r) &=&
-  \begin{cases}
-    \frac{3}{r_{\rm lim}^3} \, r^2 & \text{if } 0 < r < r_{\rm lim}\\
-    0              & \text{otherwise}
-  \end{cases}\\
-p(v) &=& \frac{1}{\sqrt{2\pi}\,\sigma_v} \,
-  \exp\left[-\frac{1}{2} \, \frac{v^2}{\sigma_v^2} \right] \quad .
-\end{eqnarray}
-For each of the two stars, we use \project{emcee}
-to generate posterior samples in $(r, v_\alpha,
-v_\delta, \hat{v}_r)$ by running 64 walkers for 4608 steps and discarding the
-first 512 steps as the burn-in period.
-For each sample, we convert the heliocentric phase-space coordinates into
-Galactocentric coordinates assuming the Sun's position and velocity are $x_\odot
-= (-8.3, 0, 0)~{\rm kpc}$ and $v_\odot = (10, 244, 7.17)~\kms$.
-
-\section{Methods}
-\label{sec:methods}
-
-\section{Data}
-\label{sec:data}
 
 %\bibliography{ref}
 
