@@ -94,8 +94,8 @@ are also Gaussian:
         \norm\left(\hat{M}_2 \given M_2, \sigma_{M_2}^2\right)
 \end{eqnarray}
 
-We consider three possible models for the prior $p(\vec{w}_1, \vec{w}_2)$ over
-the true 6D phase-space coordinates for each star:
+Our prior over the true 6D phase-space coordinates for each star, $p(\vec{w}_1,
+\vec{w}_2)$, contains three components corresponding to the three scenarios:
 \begin{enumerate}
     \item The stars are a bound, wide-binary system on a circular orbit;
     \item The stars are co-moving within some tolerance (velocity dispersion)
@@ -105,8 +105,8 @@ the true 6D phase-space coordinates for each star:
 In case 1 (wide-binary), the prior can be expressed in terms of the 6D
 barycentric phase-space coordinates of the pair, $\vec{w}_{\rm bary}$, and the
 difference in 6D coordinates, $\Delta\vec{w}$, and is conditional on the true
-masses of the stars and a softening velocity dispersion, $V_1$, introduced to
-approximately account for eccentricity:
+masses of the stars and a (\emph{hack}) softening velocity dispersion, $V_1$,
+introduced to approximately account for eccentricity:
 \begin{eqnarray}
     p_1(\vec{w}_1, \vec{w}_2 \given M_1, M_2) &=&
         p(\vec{x}_{\rm bary} \given M_1, M_2) \,
@@ -122,7 +122,12 @@ approximately account for eccentricity:
       \mathcal{N}\left(\Delta\vec{v} \given
         2\,\left[G \, (M_1+M_2)\right]/\left|\Delta\vec{x}\right|, V_1\right) \\
 \end{eqnarray}
+The peculiarity here is that for this component, the prior is only over the
+magnitude of the coordinate separation and the magnitude of the velocity
+difference (2 of 6 dimensions), the other 4 dimensions correspond to angles,
+which we can assume to be isotropic.
 
+Cases 2 and 3 are simple to write down.
 
 %\bibliography{ref}
 
